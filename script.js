@@ -11,46 +11,6 @@ let userData = {
     verifiedLocation: false
 };
 
-// Recycling points in Astana (real addresses from 2GIS and local sources)
-const recyclingPoints = [
-    // Пункты приема макулатуры и вторсырья
-    { id: 1, name: "Пункт приема макулатуры №1 (ш. Өндіріс)", lat: 51.1156, lon: 71.3892, types: ["paper"], hours: "09:00-18:00", rating: 4.2 },
-    { id: 2, name: "LS Astana (ул. Телжан Шонанулы)", lat: 51.1142, lon: 71.3845, types: ["paper", "plastic", "glass"], hours: "09:00-19:00", rating: 4.5 },
-    { id: 3, name: "Eco-KZ (пр. Богенбай батыра, 61)", lat: 51.1491, lon: 71.4217, types: ["paper", "plastic", "glass"], hours: "10:00-17:00", rating: 4.3 },
-    { id: 4, name: "Eco-KZ (ул. Жанажол, 20/2)", lat: 51.1726, lon: 71.4238, types: ["paper", "plastic", "glass"], hours: "09:00-19:00", rating: 4.4 },
-    { id: 5, name: "Астана таза алем (ул. Кенесары, 61/2)", lat: 51.1658, lon: 71.4155, types: ["paper", "plastic", "glass", "metal"], hours: "10:00-20:00", rating: 4.6 },
-    { id: 6, name: "Taza (ул. Кравцова, 2/1)", lat: 51.0956, lon: 71.4127, types: ["paper", "plastic", "glass"], hours: "09:00-18:00", rating: 4.1 },
-    { id: 7, name: "GreenStation (Абылай хана пр-т, 29/2)", lat: 51.1512, lon: 71.4276, types: ["paper", "plastic", "glass", "metal"], hours: "09:00-18:00", rating: 4.7 },
-    { id: 8, name: "Пункт приема (пр. Республики, 34А)", lat: 51.1542, lon: 71.4678, types: ["paper", "metal"], hours: "09:00-18:00", rating: 4.0 },
-    { id: 9, name: "Пункт приема (пр. Республики, 68)", lat: 51.1628, lon: 71.4755, types: ["paper", "metal"], hours: "09:00-18:00", rating: 4.2 },
-    { id: 10, name: "Пункт приема (ул. Газеты Егемен Казахстан, 2/1)", lat: 51.1382, lon: 71.4198, types: ["paper", "metal"], hours: "09:00-18:00", rating: 4.1 },
-    { id: 11, name: "Пункт приема (ул. Сакена Жунисова, 74)", lat: 51.1456, lon: 71.4892, types: ["paper", "metal"], hours: "09:00-18:00", rating: 4.3 },
-    { id: 12, name: "Пункт приема (ул. Иманбаевой, 7Б)", lat: 51.1825, lon: 71.4465, types: ["paper", "plastic", "metal"], hours: "09:00-18:00", rating: 4.2 },
-    { id: 13, name: "Пункт приема (пр. Мангилик Ел, 50)", lat: 51.1278, lon: 71.4312, types: ["paper", "plastic"], hours: "09:00-18:00", rating: 4.4 },
-    { id: 14, name: "Пункт приема (пр. Сарыарка, 31А)", lat: 51.1681, lon: 71.4042, types: ["paper", "plastic", "glass"], hours: "09:00-19:00", rating: 4.5 },
-    { id: 15, name: "Пункт приема (ул. Жанажол, 20/3)", lat: 51.1728, lon: 71.4242, types: ["paper", "plastic", "glass"], hours: "09:00-20:00", rating: 4.3 },
-    { id: 16, name: "Пункт приема (6-й микрорайон)", lat: 51.1835, lon: 71.4578, types: ["paper", "glass"], hours: "10:00-16:00", rating: 4.0 },
-    { id: 17, name: "Контейнер для батареек (EXPO 2017)", lat: 51.0880, lon: 71.4092, types: ["batteries"], hours: "24/7", rating: 4.8 },
-    
-    // Торговые центры
-    { id: 18, name: "Mega Silk Way", lat: 51.1282, lon: 71.4306, types: ["plastic", "glass", "paper"], hours: "10:00-22:00", rating: 4.6 },
-    { id: 19, name: "Khan Shatyr", lat: 51.1327, lon: 71.4062, types: ["plastic", "paper"], hours: "10:00-22:00", rating: 4.5 },
-    { id: 20, name: "Keruen Mall", lat: 51.1355, lon: 71.4504, types: ["plastic", "glass"], hours: "10:00-22:00", rating: 4.3 },
-    
-    // Университеты и другие точки
-    { id: 21, name: "Nazarbayev University", lat: 51.0909, lon: 71.4054, types: ["plastic", "glass", "paper", "metal"], hours: "24/7", rating: 4.8 },
-    { id: 22, name: "EXPO 2017 Territory", lat: 51.0890, lon: 71.4120, types: ["plastic", "glass", "paper"], hours: "08:00-20:00", rating: 4.7 },
-    
-    // Дополнительные пункты приема металла
-    { id: 23, name: "Пункт приема металла (Левый берег)", lat: 51.1954, lon: 71.4380, types: ["metal"], hours: "09:00-18:00", rating: 4.2 },
-    { id: 24, name: "Пункт приема металла (Правый берег, Сарыарка)", lat: 51.1686, lon: 71.4028, types: ["metal"], hours: "09:00-18:00", rating: 4.0 },
-    { id: 25, name: "Пункт приема металла (Центр)", lat: 51.1509, lon: 71.4238, types: ["metal"], hours: "09:00-18:00", rating: 4.3 },
-    { id: 26, name: "Пункт приема металла (Правый берег)", lat: 51.1748, lon: 71.4870, types: ["metal"], hours: "09:00-18:00", rating: 4.1 },
-    { id: 27, name: "Пункт приема металла (Юг)", lat: 51.1155, lon: 71.4586, types: ["metal"], hours: "09:00-18:00", rating: 4.4 },
-    { id: 28, name: "Пункт приема металла (Западная часть)", lat: 51.1612, lon: 71.3520, types: ["metal"], hours: "09:00-18:00", rating: 4.0 },
-    { id: 29, name: "Пункт приема (ул. Габидена Мустафина, 17/1)", lat: 51.1234, lon: 71.4562, types: ["paper", "plastic", "metal"], hours: "09:00-18:00", rating: 4.2 },
-    { id: 30, name: "Пункт приема (трасса Астана-Караганда, 7/2)", lat: 51.1058, lon: 71.5123, types: ["paper", "plastic", "metal"], hours: "09:00-18:00", rating: 4.1 },
-];
 
 // Leaderboard data
 let leaderboardData = [
