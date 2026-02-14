@@ -10,6 +10,7 @@ let userData = {
     nearestPoint: null,
     verifiedLocation: false
 };
+
 // Recycling points in Astana (real addresses from 2GIS - December 2024)
 const recyclingPoints = [
     // Пункты приема металла
@@ -80,7 +81,6 @@ const recyclingPoints = [
     { id: 49, name: "Mega Silk Way", lat: 51.1282, lon: 71.4306, types: ["plastic", "glass", "paper"], hours: "10:00-22:00", rating: 4.6 },
     { id: 50, name: "Khan Shatyr", lat: 51.1327, lon: 71.4062, types: ["plastic", "paper"], hours: "10:00-22:00", rating: 4.5 },
 ];
-
 
 // Leaderboard data
 let leaderboardData = [
