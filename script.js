@@ -8,8 +8,7 @@ let userData = {
     rank: 1,
     currentLocation: null,
     nearestPoint: null,
-    verifiedLocation: false,
-    completedQuests: []
+    verifiedLocation: false
 };
 
 // Recycling points in Astana
@@ -82,7 +81,6 @@ const questTemplates = [
 let dailyQuests = [];
 
 function generateDailyQuests() {
-    // Generate 3 random quests for the day
     const shuffled = [...questTemplates].sort(() => Math.random() - 0.5);
     dailyQuests = shuffled.slice(0, 3).map(template => ({
         ...template,
@@ -91,18 +89,15 @@ function generateDailyQuests() {
         claimed: false
     }));
     
-    // Load saved progress if exists
     const saved = localStorage.getItem('dailyQuests');
     const lastReset = localStorage.getItem('questResetTime');
     const now = new Date();
     
     if (saved && lastReset) {
         const resetTime = new Date(lastReset);
-        // Check if it's the same day
         if (now.toDateString() === resetTime.toDateString()) {
             dailyQuests = JSON.parse(saved);
         } else {
-            // New day, save new quests
             localStorage.setItem('questResetTime', now.toISOString());
             localStorage.setItem('dailyQuests', JSON.stringify(dailyQuests));
         }
@@ -161,7 +156,6 @@ function updateQuestProgress(type, itemType = null, amount = 1) {
     dailyQuests.forEach(quest => {
         if (quest.completed || quest.claimed) return;
         
-        // Check quest type and update progress
         if (quest.type === 'any') {
             quest.progress += 1;
             updated = true;
@@ -176,7 +170,6 @@ function updateQuestProgress(type, itemType = null, amount = 1) {
             updated = true;
         }
         
-        // Mark as completed if target reached
         if (quest.progress >= quest.target) {
             quest.completed = true;
         }
@@ -192,18 +185,14 @@ function claimQuest(index) {
     const quest = dailyQuests[index];
     if (!quest.completed || quest.claimed) return;
     
-    // Award points
     userData.points += quest.points;
     quest.claimed = true;
     
-    // Save
     localStorage.setItem('dailyQuests', JSON.stringify(dailyQuests));
     
-    // Update display
     updateNavDisplay();
     displayQuests();
     
-    // Show notification
     alert(`🎉 Quest completed! You earned ${quest.points} points!`);
 }
 
@@ -230,11 +219,10 @@ function updateQuestTimer() {
 }
 
 // ==================== GEOLOCATION VERIFICATION ====================
-const VERIFICATION_RADIUS = 100; // meters - считается что пользователь рядом
+const VERIFICATION_RADIUS = 100; // meters
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    // Haversine formula
-    const R = 6371e3; // Earth radius in meters
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -245,7 +233,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
             Math.sin(Δλ/2) * Math.sin(Δλ/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-    return R * c; // Distance in meters
+    return R * c;
 }
 
 function findNearestPoint(userLat, userLon) {
@@ -288,7 +276,6 @@ function checkLocationForLogging() {
             userData.nearestPoint = nearest;
             
             if (nearest.distance <= VERIFICATION_RADIUS) {
-                // VERIFIED - User is near a recycling point!
                 userData.verifiedLocation = true;
                 statusDiv.innerHTML = `
                     <div class="success">
@@ -298,12 +285,10 @@ function checkLocationForLogging() {
                     </div>
                 `;
                 
-                // Show the recycling form
                 document.getElementById('recyclingForm').style.display = 'flex';
                 btn.style.display = 'none';
                 
             } else {
-                // NOT VERIFIED - Too far
                 userData.verifiedLocation = false;
                 const kmAway = (nearest.distance / 1000).toFixed(2);
                 statusDiv.innerHTML = `
@@ -342,40 +327,6 @@ function showNearestOnMap() {
     }
 }
 
-function verifyLocation() {
-    const resultDiv = document.getElementById('verificationResult');
-    
-    if (!navigator.geolocation) {
-        resultDiv.innerHTML = '<p class="error">Geolocation not supported</p>';
-        return;
-    }
-    
-    resultDiv.innerHTML = '<p class="checking">Checking your location...</p>';
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const userLat = position.coords.latitude;
-            const userLon = position.coords.longitude;
-            
-            const nearest = findNearestPoint(userLat, userLon);
-            
-            if (nearest.distance <= VERIFICATION_RADIUS) {
-                resultDiv.innerHTML = `
-                    <p class="success">✅ Verified! You're ${nearest.distance.toFixed(0)}m from ${nearest.name}</p>
-                `;
-                userData.verifiedLocation = true;
-            } else {
-                resultDiv.innerHTML = `
-                    <p class="error">❌ You're ${(nearest.distance/1000).toFixed(2)}km away from ${nearest.name}</p>
-                `;
-            }
-        },
-        (error) => {
-            resultDiv.innerHTML = '<p class="error">Could not verify location</p>';
-        }
-    );
-}
-
 // ==================== MAP ====================
 let map;
 let markers = [];
@@ -383,18 +334,13 @@ let userMarker = null;
 let currentFilter = 'all';
 
 function initMap() {
-    // Create map centered on Astana
     map = L.map('map').setView([51.1694, 71.4491], 12);
     
-    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     
-    // Add all markers
     displayMarkers();
-    
-    // Try to show user location on map
     showUserLocationOnMap();
 }
 
@@ -405,7 +351,6 @@ function showUserLocationOnMap() {
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
                 
-                // Add user marker
                 const userIcon = L.divIcon({
                     html: '<div style="background: #007bff; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>',
                     className: '',
@@ -424,11 +369,9 @@ function showUserLocationOnMap() {
 }
 
 function displayMarkers(filter = 'all') {
-    // Clear existing markers
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
     
-    // Filter points
     let pointsToShow = recyclingPoints;
     if (filter !== 'all') {
         pointsToShow = recyclingPoints.filter(point => 
@@ -436,7 +379,6 @@ function displayMarkers(filter = 'all') {
         );
     }
     
-    // Add markers
     pointsToShow.forEach(point => {
         const marker = L.marker([point.lat, point.lon])
             .bindPopup(`
@@ -456,7 +398,6 @@ function filterMap(type) {
     currentFilter = type;
     displayMarkers(type);
     
-    // Update active button
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -465,15 +406,12 @@ function filterMap(type) {
 
 // ==================== NAVIGATION ====================
 function showPage(pageName) {
-    // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
     
-    // Show selected page
     document.getElementById(`page-${pageName}`).classList.add('active');
     
-    // Update nav links
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
@@ -481,17 +419,14 @@ function showPage(pageName) {
         event.target.classList.add('active');
     }
     
-    // If showing dashboard, update it
     if (pageName === 'dashboard') {
         updateDashboard();
     }
     
-    // If showing leaderboard, update it
     if (pageName === 'leaderboard') {
         updateLeaderboard();
     }
     
-    // If showing quests, update them
     if (pageName === 'quests') {
         displayQuests();
     }
@@ -499,7 +434,6 @@ function showPage(pageName) {
 
 // ==================== RECYCLING LOGGER ====================
 function logRecycling() {
-    // Check if location is verified
     if (!userData.verifiedLocation) {
         alert('⚠️ Please verify your location first!');
         return;
@@ -513,42 +447,33 @@ function logRecycling() {
         return;
     }
     
-    // Calculate points
     const pointsEarned = Math.round(weight * POINTS_PER_KG[itemType]);
     const co2Saved = (weight * CO2_PER_KG[itemType]).toFixed(2);
     
-    // Update user data
     userData.points += pointsEarned;
     userData.recycled_kg += weight;
     userData.co2_saved += parseFloat(co2Saved);
     userData.level = Math.floor(userData.points / 1000) + 1;
     
-    // Update leaderboard
     const userIndex = leaderboardData.findIndex(u => u.name === "You");
     leaderboardData[userIndex].points = userData.points;
     leaderboardData[userIndex].recycled = userData.recycled_kg;
     
-    // Update quest progress
     updateQuestProgress('recycle', itemType, 1);
     if (itemType === 'paper' || itemType === 'plastic') {
         updateQuestProgress('weight', itemType, weight);
     }
     
-    // Check achievements
     checkAchievements();
     
-    // Show result
     document.getElementById('pointsEarned').textContent = `You earned ${pointsEarned} eco-points!`;
     document.getElementById('impactMessage').textContent = `You saved ${co2Saved} kg of CO₂ 🌍`;
     document.getElementById('scanResult').style.display = 'block';
     
-    // Update nav display
     updateNavDisplay();
     
-    // Reset verification for next time
     userData.verifiedLocation = false;
     
-    // Clear form
     setTimeout(() => {
         document.getElementById('itemType').value = '';
         document.getElementById('itemWeight').value = '';
@@ -567,13 +492,11 @@ function updateDashboard() {
     document.getElementById('totalRecycled').textContent = `${userData.recycled_kg.toFixed(1)} kg`;
     document.getElementById('co2Saved').textContent = `${userData.co2_saved.toFixed(1)} kg`;
     
-    // Calculate rank
     leaderboardData.sort((a, b) => b.points - a.points);
     const userRank = leaderboardData.findIndex(u => u.name === "You") + 1;
     userData.rank = userRank;
     document.getElementById('userRank').textContent = `#${userRank}`;
     
-    // Display achievements
     const achievementList = document.getElementById('achievementList');
     achievementList.innerHTML = '';
     
